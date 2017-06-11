@@ -1,0 +1,119 @@
+Create Index:
+curl -XPUT 'localhost:9200/customer?pretty&pretty'
+
+List All Index:
+curl -XGET 'localhost:9200/_cat/indices?v&pretty'
+
+Index a Document:
+curl -XPUT 'localhost:9200/customer/external/1?pretty&pretty' -H 'Content-Type: application/json' -d'
+{
+  "name": "John Doe"
+}
+'
+
+Retrieve the Document:
+curl -XGET 'localhost:9200/customer/external/1?pretty&pretty'
+
+Delete the Index:
+
+curl -XDELETE 'localhost:9200/customer?pretty&pretty'
+curl -XGET 'localhost:9200/_cat/indices?v&pretty'
+
+Modifying the data in the Index:
+curl -XPUT 'localhost:9200/customer/external/1?pretty&pretty' -H 'Content-Type: application/json' -d'
+{
+  "name": "Jane Doe"
+}
+'
+
+Creating and Loading document into Index without ID:
+curl -XPOST 'localhost:9200/customer/external?pretty&pretty' -H 'Content-Type: application/json' -d'
+{
+  "name": "Jane Doe"
+}
+'
+
+Update a Document:
+curl -XPOST 'localhost:9200/customer/external/1/_update?pretty&pretty' -H 'Content-Type: application/json' -d'
+{
+  "doc": { "name": "Jane Doe" }
+}
+'
+
+curl -XPOST 'localhost:9200/customer/external/1/_update?pretty&pretty' -H 'Content-Type: application/json' -d'
+{
+  "doc": { "name": "Jane Doe", "age": 20 }
+}
+'
+
+
+Update using simple Script:
+
+curl -XPOST 'localhost:9200/customer/external/1/_update?pretty&pretty' -H 'Content-Type: application/json' -d'
+{
+  "script" : "ctx._source.age += 5"
+}
+'
+updates can only be performed on a single document at a time.
+
+Deleting a Document with an ID:
+
+curl -XDELETE 'localhost:9200/customer/external/2?pretty&pretty'
+
+Much more efficient to delete a whole index instead of deleting all documents with the Delete By Query API.
+
+Batch Processing using Bulk API:
+
+curl -XPOST 'localhost:9200/customer/external/_bulk?pretty&pretty' -H 'Content-Type: application/json' -d'
+{"index":{"_id":"1"}}
+{"name": "John Doe" }
+{"index":{"_id":"2"}}
+{"name": "Jane Doe" }
+'
+curl -XPOST 'localhost:9200/customer/external/_bulk?pretty&pretty' -H 'Content-Type: application/json' -d'
+{"update":{"_id":"1"}}
+{"doc": { "name": "John Doe becomes Jane Doe" } }
+{"delete":{"_id":"2"}}
+'
+
+Loading a sample dataset using _bulk API:
+
+curl -H "Content-Type: application/json" -XPOST 'localhost:9200/bank/account/_bulk?pretty&refresh' --data-binary "@CustomerFileAccount.json"
+
+Search API:
+2 Ways of Searching
+
+GET /bank/_search?q=*&sort=account_number:asc&pretty
+
+GET /bank/_search
+{
+  "query": { "match_all": {} },
+  "sort": [
+    { "account_number": "asc" }
+  ]
+}
+
+GET /bank/_search
+{
+  "query": { "match_all": {} },
+  "size": 1
+}
+
+GET /bank/_search
+{
+  "query": { "match_all": {} },
+  "from": 10,
+  "size": 10
+}
+
+
+curl -XGET 'localhost:9200/bank/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+  "query": { "match_all": {} },
+  "from": 1,
+  "size": 100,
+  "sort": [
+    { "account_number": "asc" }
+  ]
+}
+'
