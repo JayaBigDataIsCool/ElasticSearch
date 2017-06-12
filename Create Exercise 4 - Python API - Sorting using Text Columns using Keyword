@@ -1,0 +1,32 @@
+from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Search
+from pandasticsearch import DataFrame
+from pandasticsearch import Select
+from pandasticsearch import *
+
+df = DataFrame.from_es(url='http://localhost:9200', index='bank')
+df.print_schema()
+print(df.columns)
+
+client = Elasticsearch()
+
+s = Search(using=client, index="bank") \
+    .query("match", age="20").sort({"firstname.keyword" : "desc"})
+
+s=s[1:1000]
+
+response = s.execute()
+
+assert isinstance(response, object)
+for hit in response:
+    print("Match Results: account_number: " + str(hit.account_number) +
+          " First Name: " + hit.firstname +
+          " LastName: " + hit.lastname +
+          " Age: " + str(hit.age) +
+          " gender: " + hit.gender +
+          " address: " + str(hit.address) +
+          " employer :" + str(hit.employer) +
+          " email: " + str(hit.email) +
+          " city: " + hit.city +
+          " state: " + hit.state
+          )
