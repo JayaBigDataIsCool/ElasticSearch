@@ -1,0 +1,66 @@
+from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Search
+from pandasticsearch import DataFrame
+from pandasticsearch import Select
+from pandasticsearch import *
+import time
+import os
+
+df = DataFrame.from_es(url='http://localhost:9200', index='bank')
+#df.print_schema()
+#print(df.columns)
+
+client = Elasticsearch()
+beforetime = time.time()
+
+s = Search(using=client, index="bank") \
+    .query("match", age="20") \
+    .source(['account_number', 'firstname']) \
+    .sort({"age" : "asc"})[0:1000]
+
+s=s.query("match", firstname="Landry")
+response = s.execute()
+aftertime = time.time()
+(roundtrip) = str (aftertime - beforetime)
+print ("Round Trip Time for small data : " + roundtrip)
+
+for hit in response:
+    print("Match Results for smaller data: account_number: " + str(hit.account_number) +
+          " First Name: " + hit.firstname
+      #    " LastName: " + hit.lastname +
+       #   " Age: " + str(hit.age) +
+      #    " gender: " + hit.gender +
+       #   " address: " + str(hit.address) +
+       #   " employer :" + str(hit.employer) +
+        #  " email: " + str(hit.email) +
+         # " city: " + hit.city +
+        #  " state: " + hit.state
+          )
+
+
+beforetime = time.time()
+
+s = Search(using=client, index="bankaccount") \
+    .query("match", age="20") \
+    .source(['account_number', 'firstname']) \
+    .sort({"age" : "asc"})[0:1000]
+
+s=s.query("match", firstname="Landry")
+response = s.execute()
+aftertime = time.time()
+(roundtrip) = str (aftertime - beforetime)
+print ("Round Trip Time for larger data : " + roundtrip)
+
+for hit in response:
+    print("Match Results for larger data: account_number: " + str(hit.account_number) +
+          " First Name: " + hit.firstname
+      #    " LastName: " + hit.lastname +
+       #   " Age: " + str(hit.age) +
+      #    " gender: " + hit.gender +
+       #   " address: " + str(hit.address) +
+       #   " employer :" + str(hit.employer) +
+        #  " email: " + str(hit.email) +
+         # " city: " + hit.city +
+        #  " state: " + hit.state
+          )
+
